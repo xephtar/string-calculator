@@ -1,23 +1,69 @@
 package org.example;
 
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+
 public class StringCalculator {
-    public Integer Add(String numbers) {
+    private static final int MAX_LIMIT = 1000;
+    private Boolean isNegative(int number) {
+        return number < 0;
+    }
+
+    private String getDelimiter(String numbers){
         var template = "//";
-        var delimiter = ",|\n";
         if(numbers.startsWith(template)){
-            delimiter = numbers.substring(2,3);
-            numbers = numbers.substring(4);
+            var newLineIndex = numbers.lastIndexOf("\n");
+            var delimiterString = numbers.substring(2, newLineIndex);
+
+            if(delimiterString.length() == 1){
+                return  delimiterString;
+            }
+
+            return delimiterString.replaceAll("\\[|\\]", "");
         }
+        return ",|\n";
+    }
 
-        if(numbers.equals("")) return 0;
+    private String cleanNumbers(String numbers, String delimiter){
+        if(delimiter.equals(",|\n")){
+                return numbers;
+        }
+        return numbers.replaceAll("//.+\n", "");
+    }
 
-        String[] strArray = numbers.split(delimiter);
+    private Boolean isIgnorable(int number){
+        return number > MAX_LIMIT;
+    }
+
+    private int addAll(String[] strArray) {
+
+        ArrayList<String> negativeNumbers = new ArrayList<>();
 
         int sum = 0;
         for (String s : strArray) {
-            sum += Integer.parseInt(s);
+            var parsedInt = Integer.parseInt(s);
+            if (isNegative(parsedInt)){
+                negativeNumbers.add(s);
+            }
+            if(!isIgnorable(parsedInt)){
+                sum += parsedInt;
+            }
+        }
+
+        if(negativeNumbers.size() > 0){
+            throw new InvalidParameterException("error: negatives not allowed: " + String.join(" ", negativeNumbers));
         }
 
         return sum;
+    }
+
+    public Integer Add(String numbers) {
+        if(numbers.isEmpty()) return 0;
+
+        var delimiter = getDelimiter(numbers);
+        numbers = cleanNumbers(numbers, delimiter);
+        numbers = numbers.replaceAll("[^\\d-]",",");
+
+        return addAll(numbers.split(",+"));
     }
 }

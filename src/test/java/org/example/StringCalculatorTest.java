@@ -2,6 +2,8 @@ package org.example;
 
 import org.junit.jupiter.api.Test;
 
+import java.security.InvalidParameterException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StringCalculatorTest {
@@ -37,12 +39,74 @@ class StringCalculatorTest {
     }
 
     @Test
+    void newCustomSeparatorDecider() {
+        assertEquals(6, new StringCalculator().Add("//[***]\n1***2***3"));
+    }
+
+    @Test
+    void newCustomSeparatorWithNegativeNumbers() {
+        try
+        {
+            new StringCalculator().Add("//[***]\n-1***2***-3");
+        }
+        catch( final InvalidParameterException e )
+        {
+            final String msg = "error: negatives not allowed: -1 -3";
+            assertEquals(msg, e.getMessage());
+        }
+    }
+
+    @Test
+    void doubleSeparatorDecider() {
+        assertEquals(6, new StringCalculator().Add("//[*][%]\n1*2%3"));
+    }
+
+    @Test
     void andSeparator() {
         assertEquals(6, new StringCalculator().Add("//&\n1&2&3"));
     }
 
     @Test
     void negativesNotAllowed() {
-        assertEquals(6, new StringCalculator().Add("1,-2,-3"));
+        try
+        {
+            new StringCalculator().Add("1,-2,-3");
+        }
+        catch( final InvalidParameterException e )
+        {
+            final String msg = "error: negatives not allowed: -2 -3";
+            assertEquals(msg, e.getMessage());
+        }
+    }
+
+    @Test
+    void negativeSingleNumberNotAllowed() {
+        try
+        {
+            new StringCalculator().Add("-2");
+        }
+        catch( final InvalidParameterException e )
+        {
+            final String msg = "error: negatives not allowed: -2";
+            assertEquals(msg, e.getMessage());
+        }
+    }
+
+    @Test
+    void numbersWithBiggerThan1000() {
+        assertEquals(2, new StringCalculator().Add("1001,2"));
+    }
+
+    @Test
+    void negativeNumbersAndBigNumbersNotAllowed() {
+        try
+        {
+            new StringCalculator().Add("-2,1001,-3,100");
+        }
+        catch( final InvalidParameterException e )
+        {
+            final String msg = "error: negatives not allowed: -2 -3";
+            assertEquals(msg, e.getMessage());
+        }
     }
 }
