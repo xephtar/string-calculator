@@ -9,28 +9,6 @@ public class StringCalculator {
         return number < 0;
     }
 
-    private String getDelimiter(String numbers){
-        var template = "//";
-        if(numbers.startsWith(template)){
-            var newLineIndex = numbers.lastIndexOf("\n");
-            var delimiterString = numbers.substring(2, newLineIndex);
-
-            if(delimiterString.length() == 1){
-                return  delimiterString;
-            }
-
-            return delimiterString.replaceAll("\\[|\\]", "");
-        }
-        return ",|\n";
-    }
-
-    private String cleanNumbers(String numbers, String delimiter){
-        if(delimiter.equals(",|\n")){
-                return numbers;
-        }
-        return numbers.replaceAll("//.+\n", "");
-    }
-
     private Boolean isIgnorable(int number){
         return number > MAX_LIMIT;
     }
@@ -41,6 +19,8 @@ public class StringCalculator {
 
         int sum = 0;
         for (String s : strArray) {
+            if(s.isEmpty()) continue;
+
             var parsedInt = Integer.parseInt(s);
             if (isNegative(parsedInt)){
                 negativeNumbers.add(s);
@@ -60,8 +40,6 @@ public class StringCalculator {
     public Integer Add(String numbers) {
         if(numbers.isEmpty()) return 0;
 
-        var delimiter = getDelimiter(numbers);
-        numbers = cleanNumbers(numbers, delimiter);
         numbers = numbers.replaceAll("[^\\d-]",",");
 
         return addAll(numbers.split(",+"));
